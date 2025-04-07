@@ -62,7 +62,7 @@
     path: "{{dir}}"
     state: directory
 
-- name: creating dir in target machine
+- name: Copying file from control machine to target machine
   copy:
     src: test1
     dest: "{{dir}}"
