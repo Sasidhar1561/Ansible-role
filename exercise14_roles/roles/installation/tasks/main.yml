@@ -1,0 +1,70 @@
+---
+
+# tasks file for installation
+
+- name: installing packages on centos target machine
+  yum:
+    name: "{{item}}"
+    state: present
+  when: ansible_distribution == "CentOS"
+  loop:
+    - wget
+    - zip
+    - unzip
+    - chrony
+
+- name: installing packages on ubuntu target machine
+  apt:
+    name: "{{item}}"
+    state: present
+    update_cache: yes
+  when: ansible_distribution == "Ubuntu"
+  loop:
+    - wget
+    - zip
+    - unzip
+    - ntp
+
+- name: starting packages in centos target machine
+  service:
+    name: chronyd
+    state: started
+    enabled: yes
+  when: ansible_distribution == "CentOS"
+
+- name: starting packages in ubuntu target machine
+  service:
+    name: ntp
+    state: started
+    enabled: yes
+  when: ansible_distribution == "Ubuntu"
+
+- name: copying file from control machine to target machine
+  template:
+    src: ntpconf_centos.j2
+    dest: /etc/chrony.conf
+    backup: yes
+  when: ansible_distribution == "CentOS"
+  notify:
+    - restarting centos target machine
+
+- name: copying file from control machine to target machine
+  template:
+    src: ntpconf_ubuntu.j2
+    dest: /etc/ntp.conf
+    backup: yes
+  when: ansible_distribution == "Ubuntu"
+  notify:
+    - restarting ubuntu target machine
+
+- name: making directory in target machine
+  file:
+    path: "{{dir}}"
+    state: directory
+
+- name: creating dir in target machine
+  copy:
+    src: test1
+    dest: "{{dir}}"
+
+

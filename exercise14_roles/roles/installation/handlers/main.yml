@@ -1,0 +1,17 @@
+---
+# handlers file for installation
+
+- name: restarting centos target machine
+  service:
+    name: chronyd
+    state: restarted
+    enabled: yes
+  when: ansible_distribution == "CentOS"
+
+- name: restarting ubuntu target machine
+  service:
+    name: ntp
+    state: restarted
+    enabled: yes
+  when: ansible_distribution == "Ubuntu"
+
