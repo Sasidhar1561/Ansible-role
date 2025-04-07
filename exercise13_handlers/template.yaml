@@ -1,0 +1,84 @@
+---
+
+- name: Installing packages on target machine
+  hosts: all
+  tasks: 
+    - name: installing packages on centos target machine
+      yum:
+        name: "{{item}}"
+        state: present
+      when: ansible_distribution == "CentOS"
+      loop: 
+        - wget
+        - zip
+        - unzip
+        - chrony
+
+    - name: installing packages on ubuntu target machine
+      apt:
+        name: "{{item}}"
+        state: present
+        update_cache: yes
+      when: ansible_distribution == "Ubuntu"
+      loop: 
+        - wget
+        - zip
+        - unzip
+        - ntp
+
+    - name: starting packages in centos target machine
+      service:
+        name: chronyd
+        state: started
+        enabled: yes
+      when: ansible_distribution == "CentOS"
+
+    - name: starting packages in ubuntu target machine
+      service:
+        name: ntp
+        state: started
+        enabled: yes
+      when: ansible_distribution == "Ubuntu"
+
+    - name: copying file from control machine to target machine
+      template:
+        src: templates/ntpconf_centos
+        dest: /etc/chrony.conf
+        backup: yes
+      when: ansible_distribution == "CentOS"
+      notify:
+        - restarting centos target machine
+        
+    - name: copying file from control machine to target machine
+      template:
+        src: templates/ntpconf_ubuntu
+        dest: /etc/ntp.conf
+        backup: yes
+      when: ansible_distribution == "Ubuntu"
+      notify:
+        - restarting ubuntu target machine
+
+  handlers:      
+    - name: restarting centos target machine
+      service:
+        name: chronyd
+        state: restarted
+        enabled: yes
+      when: ansible_distribution == "CentOS"
+
+    - name: restarting ubuntu target machine
+      service:
+        name: ntp
+        state: restarted
+        enabled: yes
+      when: ansible_distribution == "Ubuntu"
+
+    - name: creating dir in target machine
+      file:
+        path: /opt/test
+        state: directory
+
+
+
+
+        

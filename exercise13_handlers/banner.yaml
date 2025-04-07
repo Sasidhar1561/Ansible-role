@@ -1,0 +1,10 @@
+---
+
+- name: Deploy dynamic banner using a template
+  hosts: all
+  become: yes
+  tasks:
+    - name: Copy banner template to /etc/issue
+      ansible.builtin.template:
+        src: templates/banner.j2
+        dest: /etc/motd
